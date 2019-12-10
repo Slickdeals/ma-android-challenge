@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Slickdeals Code Challenge</string>
+
+    <string name="score_filter">Score filter</string>
+    <string name="score_placeholder">%1$s</string>
+    <string name="num_replies_placeholder">%1$s</string>
+</resources>
