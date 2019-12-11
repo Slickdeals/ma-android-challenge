@@ -1,22 +1,17 @@
 package net.slickdeals.android.app
 
-import android.app.ListActivity
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.TextView
-import android.R
-import android.widget.ListView
-import android.widget.SimpleAdapter
-import kotlinx.android.synthetic.main.activity_main.*
+import android.view.ViewGroup
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 
 
-class DealsListAdapter : ListActivity() {
+class MainActivity : AppCompatActivity() {
 
-    private val dealList: MutableList<DealSummary> = mutableListOf()
-    private val adapter by lazy {  }
-
-    private val  deals = listOf<DealSummary>(
+    private val  deals = arrayListOf<DealSummary>(
         DealSummary(
             45.0,
             "2 for 1 alligator paws at Super Doughnut Shop",
@@ -34,35 +29,12 @@ class DealsListAdapter : ListActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
-        simpleListView = findViewById(R.id.simpleListView) as ListView
-
-        val arrayList = ArrayList()
-        for (i in 0 until animalName.length) {
-            val hashMap = HashMap()//create a hashmap to store the data in key value pair
-            hashMap.put("name", animalName[i])
-            hashMap.put("image", animalImages[i] + "")
-            arrayList.add(hashMap)//add the hashmap into arrayList
-        }
-        val from = arrayOf("name", "image")//string array
-        val to = intArrayOf(R.id.textView, R.id.imageView)//int array of views id's
-        val simpleAdapter = SimpleAdapter(
-            this,
-            arrayList,
-            R.layout.list_view_items,
-            from,
-            to
-        )//Create object and set the parameters for simpleAdapter
-        simpleListView.setAdapter(simpleAdapter)//sets the adapter for listView
-
-
-        listAdapter()
-
+        populateListWithMockDeals()
     }
 
-    private fun makeAdapter(dealList: List<DealSummary>) {
-        ArrayAdapter(this, R.layout.deal_card_layout, dealList)
+    private fun populateListWithMockDeals() {
+        val listView = findViewById(R.id.simpleListView) as ListView
+        listView.adapter = DealListAdapter(this, deals)
     }
 }
 
@@ -76,23 +48,53 @@ data class DealSummary(
 )
 
 
+class DealListAdapter(
+    private val context: Context,
+    private val dataSource: ArrayList<DealSummary>) : BaseAdapter() {
 
-class DealCellViewHolder(view: View) {
-    private lateinit var priceLabel: TextView
-    private lateinit var nameLabel: TextView
-    private lateinit var extraLabel: TextView
-    private lateinit var votesLabel: TextView
-    private lateinit var commentsLabel: TextView
+    private val inflater: LayoutInflater
+            = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+    override fun getCount(): Int {
+        return dataSource.size
+    }
+
+    override fun getItem(position: Int): Any {
+        return dataSource[position]
+    }
+
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+        val view = inflater.inflate(R.layout.deal_card_layout, parent, false)
+        val deal = getItem(position) as DealSummary
+        val holder = DealCellViewHolder()
+        holder.titleLabel = view.findViewById(R.id.deal_title) as TextView
+        holder.priceLabel = view.findViewById(R.id.deal_price) as TextView
+        holder.extraLabel = view.findViewById(R.id.deal_extra) as TextView
+        holder.votesLabel = view.findViewById(R.id.vote_count) as TextView
+        holder.commentsLabel = view.findViewById(R.id.comment_count) as TextView
+        holder.bindDealSummary(deal)
+        return view
+    }
+}
+
+
+class DealCellViewHolder {
+    lateinit var titleLabel: TextView
+    lateinit var priceLabel: TextView
+    lateinit var extraLabel: TextView
+    lateinit var votesLabel: TextView
+    lateinit var commentsLabel: TextView
 
     fun bindDealSummary(deal: DealSummary) {
+        titleLabel.text = deal.title
         priceLabel.text = deal.price.toString()
-        nameLabel.text = deal.title
         extraLabel.text = deal.extra
         votesLabel.text = deal.voteCount.toString()
         commentsLabel.text = deal.commentCount.toString()
     }
 }
-
-
-
 
